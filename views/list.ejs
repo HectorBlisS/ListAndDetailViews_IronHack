@@ -1,0 +1,11 @@
+<ul>
+    <% products.forEach(function(product){ %>
+        <li>
+            <a href="/products/<%=product._id%>">
+                <h2>Titulo: <%=product.title%></h2>
+            </a>
+            <img width="100" src="<%=product.images[0] %>" alt="<%=product.title%>">
+            <h3>Price: <%=product.price%></h3>
+        </li>
+   <% }) %>
+</ul>
