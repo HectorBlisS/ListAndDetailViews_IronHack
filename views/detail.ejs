@@ -2,3 +2,18 @@
 <img width="150" src="<%=product.images[0]%>" alt="">
 <p><%=product.body%></p>
 <h3>$<%=product.price%></h3>
+
+<% product.comments.forEach(function(comment){ %>
+    <hr>
+    <p><%=comment.userName%></p>
+    <span><%=comment.date%></span>
+    <p><%=comment.body%></p>
+<%}) %>
+
+<form action="/comments/new" method="post">
+    <input placeholder="Tu nombre" type="text" name="userName">
+    <br>
+    <textarea placeholder="Tu comentario hater" type="text" name="body"></textarea> 
+    <input value="<%=product._id%>" type="hidden" name="productId"> 
+    <input type="submit">
+</form>

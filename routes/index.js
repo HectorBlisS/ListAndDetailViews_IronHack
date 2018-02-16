@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const Product = require("../models/Product");
-
+const Comment = require("../models/Comment");
 
 
 
@@ -20,6 +20,26 @@ router.get("/products/:id", (req,res)=>{
   Product.findById(id, (err, doc)=>{
     res.render("detail",{product:doc});
   });
+});
+
+//comments route
+router.post("/comments/new", (req,res)=>{
+  const comment = new Comment({
+    productId: req.body.productId,
+    userName:req.body.userName,
+    rating:0,
+    body:req.body.body,
+    date: new Date()
+  });
+  comment.save((err,result)=>{
+    if(err) return res.status(448).send(err);
+    Product.findByIdAndUpdate(req.body.productId, 
+      {$push:{comments:comment}}, (err,result)=>{
+      if(err) return res.status(500).send(err);
+      res.redirect(`/products/${req.body.productId}`);
+    });
+  });
+
 });
 
 
