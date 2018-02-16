@@ -2,6 +2,9 @@ var express = require('express');
 var router = express.Router();
 const Product = require("../models/Product");
 const Comment = require("../models/Comment");
+const User = require("../models/User");
+const bcrypt = require("bcrypt");
+const salt = bcrypt.genSaltSync(10);
 
 
 
@@ -42,6 +45,29 @@ router.post("/comments/new", (req,res)=>{
 
 });
 
+
+//signup route
+router.get("/signup", (req,res)=>{
+  res.render("signup_form", {error:null});
+});
+router.post("/signup", (req,res)=>{
+  //checamos si el usuario no esta sonso
+  if(req.body.password2 !== req.body.password){
+    res.render("signup_form", {error:"Tus password no coinciden duh!"})
+  }
+  const hash = bcrypt.hashSync(req.body.password, salt);
+  const user = new User({
+    userName: req.body.userName,
+    password: hash,
+    favoriteHexColor: req.body.favoriteHexColor
+  });
+  user.save((err,result)=>{
+    if(!err){
+      res.redirect("/");
+    }
+  });
+
+});
 
 
 /* GET home page. */
