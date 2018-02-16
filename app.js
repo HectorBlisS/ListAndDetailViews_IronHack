@@ -4,6 +4,9 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+const session = require("express-session");
+const MongoStore =require("connect-mongo")(session);
+
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -12,6 +15,16 @@ var app = express();
 
 const mongoose = require("mongoose");
 mongoose.connect("mongodb://localhost:27017/store");
+
+//Sesiones de usuario
+app.use(session({
+  secret: "bliss",
+  cookie: { maxAge: 60000 },
+  store: new MongoStore({
+    mongooseConnection: mongoose.connection,
+    ttl: 24 * 60 * 60 // 1 day
+  })
+}));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

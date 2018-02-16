@@ -13,7 +13,10 @@ router.get("/products", (req,res)=>{
   Product.find({}, (err, docs)=>{
     console.log(docs);
     if(err) res.status(500).send(err);
-    res.render("list", {products:docs});
+    if(req.session.currentUser){
+      return res.render("list", {products:docs});
+    }
+    return res.redirect("/login");
   });
 });
 
@@ -53,8 +56,13 @@ router.get("/signup", (req,res)=>{
 router.post("/signup", (req,res)=>{
   //checamos si el usuario no esta sonso
   if(req.body.password2 !== req.body.password){
-    res.render("signup_form", {error:"Tus password no coinciden duh!"})
+    return res.render("signup_form", {error:"Tus password no coinciden duh!"})
   }
+  User.findOne({userName:req.body.userName}, (err,doc)=>{
+    if(doc){
+      return res.render("signup_form", {error:"Este correo ya se está usando"})
+    }
+  });
   const hash = bcrypt.hashSync(req.body.password, salt);
   const user = new User({
     userName: req.body.userName,
@@ -63,10 +71,34 @@ router.post("/signup", (req,res)=>{
   });
   user.save((err,result)=>{
     if(!err){
-      res.redirect("/");
+      return res.redirect("/");
     }
   });
 
+});
+
+//ruta para login
+router.get("/login", (req,res)=>{
+  if(req.session.currentUser){
+    return res.redirect("/products");
+  }
+  res.render("login_form", {error:null})
+});
+
+router.post("/login", (req,res)=>{
+  User.findOne({userName:req.body.userName}, (err,doc)=>{
+    if(err) return res.render("login_form", {error:"tu nombre de usuario es incorrecto"})
+    if(bcrypt.compareSync(req.body.password, doc.password)){
+      req.session.currentUser = doc;
+      res.redirect("/products");
+    }
+  });
+});
+
+//cerrar sesion
+router.get("/logout", (req,res)=>{
+  req.session.destroy();
+  res.redirect("/login");
 });
 
 
